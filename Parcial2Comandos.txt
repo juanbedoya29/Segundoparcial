@@ -1,0 +1,56 @@
+1. Instalar CLI de azure, si usa cliente de linea de comandos
+
+--curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+2. Crear un grupo de recursos
+   Grupo logico en el que se implementan y administran recursos de Azure
+
+-- az group create --name myResourceGroup --location eastus
+
+3. Habilitacion de la supervision de clústeres
+   Compruebe que Microsoft.OperationsManagement y Microsoft.OperationalInsights están registrados en la suscripción.
+
+--az provider show -n Microsoft.OperationsManagement -o table
+--az provider show -n Microsoft.OperationalInsights -o table
+
+   Si no están registrados, use el siguiente comando
+
+--az provider register --namespace Microsoft.OperationsManagement
+--az provider register --namespace Microsoft.OperationalInsights
+
+4. Creacion de clúster de AKS
+
+--az aks create \
+    --resource-group myResourceGroup \
+    --name myAKSCluster \
+    --node-count 2 \
+    --generate-ssh-keys \
+    --attach-acr azureprueba1
+
+5. Instalacion kubectl en la CLI de Azure
+
+-- az aks install-cli
+
+6. Conectarse al clúster mediante kubectl
+
+-- az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
+
+7. comprobar la conexión al clúster
+
+--kubectl get nodes
+
+8. Iniciar sesion en el registro del contenedores
+
+--az acr login --name azureprueba1
+
+9.Para integrar un ACR existente con clústeres de AKS existentes
+
+--az aks update -n myAKSCluster -g myResourceGroup --attach-acr azureprueba1
+
+10. Etiquetar imagenes docker con el nombre de registro de contenedores de Azure Kubernetes 
+
+--docker tag mcr.microsoft.com/azuredocs/azure-vote-front:v1 <acrLoginServer>/azure-vote-front:v1
+
+11. Insertar imagenes en el registro de contenedores de Azure
+
+--docker push <acrLoginServer>/azure-vote-front:v1
